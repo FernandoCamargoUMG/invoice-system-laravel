@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
 
 // Rutas públicas (sin autenticación)
 Route::prefix('auth')->group(function () {
@@ -38,5 +39,9 @@ Route::middleware('jwt')->group(function () {
     // Rutas de pagos
     Route::apiResource('payments', PaymentController::class);
     Route::get('invoices/{invoice_id}/payments', [PaymentController::class, 'getByInvoice']);
+    
+    // Rutas de usuarios (administración)
+    Route::apiResource('users', UserController::class);
+    Route::patch('users/{user}/role', [UserController::class, 'changeRole']);
     
 });

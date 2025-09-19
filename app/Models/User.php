@@ -43,7 +43,7 @@ class User extends Authenticatable
     {
         return [
             'created_at' => 'datetime',
-            'password' => 'hashed',
+            // Quitar 'password' => 'hashed' para usar MD5 manual
         ];
     }
 
