@@ -13,13 +13,17 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'type',
+        'sku',
         'description',
         'price',
+        'cost_price',
         'stock'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
         'created_at' => 'datetime',
     ];
 
@@ -31,6 +35,62 @@ class Product extends Model
     public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    /**
+     * Relación con compras
+     */
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    /**
+     * Relación con cotizaciones
+     */
+    public function quoteItems(): HasMany
+    {
+        return $this->hasMany(QuoteItem::class);
+    }
+
+    /**
+     * Relación con movimientos de inventario
+     */
+    public function inventoryMovements(): HasMany
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
+
+    /**
+     * Scope para productos solamente
+     */
+    public function scopeProducts($query)
+    {
+        return $query->where('type', 'product');
+    }
+
+    /**
+     * Scope para servicios solamente
+     */
+    public function scopeServices($query)
+    {
+        return $query->where('type', 'service');
+    }
+
+    /**
+     * Verificar si es un producto físico
+     */
+    public function isProduct(): bool
+    {
+        return $this->type === 'product';
+    }
+
+    /**
+     * Verificar si es un servicio
+     */
+    public function isService(): bool
+    {
+        return $this->type === 'service';
     }
 
     /**

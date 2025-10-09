@@ -15,11 +15,19 @@ class Invoice extends Model
         'customer_id',
         'user_id',
         'total',
+        'subtotal',
+        'tax_amount',
+        'tax_rate',
+        'balance_due',
         'status'
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'tax_rate' => 'decimal:4',
+        'balance_due' => 'decimal:2',
         'created_at' => 'datetime',
     ];
 
@@ -62,10 +70,60 @@ class Invoice extends Model
      */
     public function calculateTotals()
     {
-        $total = $this->items->sum(function ($item) {
-            return $item->quantity * $item->price;
-        });
+        $taxRate = $this->tax_rate ?: config('app.tax_rate', 0.12);
+        $subtotal = 0;
+        $tax = 0;
 
-        $this->update(['total' => $total]);
+        foreach ($this->items as $item) {
+            // Calcular precio incluye impuesto
+            $itemSubtotal = $item->price / (1 + $taxRate);
+            $itemTax = $item->price - $itemSubtotal;
+            $subtotal += $itemSubtotal * $item->quantity;
+            $tax += $itemTax * $item->quantity;
+        }
+
+        $total = $subtotal + $tax;
+        $balanceDue = $total - $this->payments->sum('amount');
+
+        $this->update([
+            'subtotal' => round($subtotal, 2),
+            'tax_amount' => round($tax, 2),
+            'total' => round($total, 2),
+            'tax_rate' => $taxRate,
+            'balance_due' => round($balanceDue, 2)
+        ]);
+    }
+
+    /**
+     * Relación con pagos
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Calcular saldo pendiente
+     */
+    public function getBalanceDueAttribute()
+    {
+        return $this->total - $this->payments->sum('amount');
+    }
+
+    /**
+     * Verificar si está completamente pagada
+     */
+    public function isPaid(): bool
+    {
+        return $this->balance_due <= 0;
+    }
+
+    /**
+     * Verificar si tiene pago parcial
+     */
+    public function isPartiallyPaid(): bool
+    {
+        $totalPaid = $this->payments->sum('amount');
+        return $totalPaid > 0 && $totalPaid < $this->total;
     }
 }

@@ -51,15 +51,17 @@ class InvoiceController extends Controller
             DB::beginTransaction();
 
             try {
+                // Obtener tax_rate del config o usar default
+                $taxRate = config('app.tax_rate', 0.12);
+                
                 // Crear la factura
                 $invoice = Invoice::create([
                     'customer_id' => $validatedData['customer_id'],
-                    'user_id' => $request->user()->id, // Obtener user_id del middleware
+                    'user_id' => $request->user()->id,
+                    'tax_rate' => $taxRate,
                     'total' => 0, // Se calculará después
                     'status' => 'pending'
                 ]);
-
-                $totalAmount = 0;
 
                 // Crear los items de la factura
                 foreach ($validatedData['items'] as $itemData) {
@@ -77,23 +79,28 @@ class InvoiceController extends Controller
                         'price' => $itemData['price']
                     ]);
 
-                    // Calcular total
-                    $totalAmount += $itemData['quantity'] * $itemData['price'];
-
                     // Actualizar stock del producto
                     $product->decrement('stock', $itemData['quantity']);
                 }
 
-                // Actualizar total de la factura
-                $invoice->update(['total' => $totalAmount]);
+                // Calcular totales como en sistema PHP vanilla
+                $invoice->load('items'); // Cargar items para cálculo
+                $invoice->calculateTotals();
 
                 DB::commit();
 
-                $invoice->load(['customer', 'user', 'items.product']);
+                $invoice->load(['customer', 'user', 'items.product', 'payments']);
 
                 return response()->json([
                     'message' => 'Factura creada exitosamente',
-                    'invoice' => $invoice
+                    'invoice' => $invoice,
+                    'breakdown' => [
+                        'subtotal' => $invoice->subtotal,
+                        'tax_amount' => $invoice->tax_amount,
+                        'tax_rate' => $invoice->tax_rate,
+                        'total' => $invoice->total,
+                        'balance_due' => $invoice->balance_due
+                    ]
                 ], 201);
 
             } catch (\Exception $e) {
@@ -116,8 +123,21 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice): JsonResponse
     {
-        $invoice->load(['customer', 'user', 'items.product']);
-        return response()->json($invoice);
+        $invoice->load(['customer', 'user', 'items.product', 'payments']);
+        
+        return response()->json([
+            'invoice' => $invoice,
+            'breakdown' => [
+                'subtotal' => $invoice->subtotal,
+                'tax_amount' => $invoice->tax_amount,
+                'tax_rate' => $invoice->tax_rate,
+                'total' => $invoice->total,
+                'balance_due' => $invoice->balance_due,
+                'total_paid' => $invoice->payments->sum('amount'),
+                'is_paid' => $invoice->isPaid(),
+                'is_partial' => $invoice->isPartiallyPaid()
+            ]
+        ]);
     }
 
     /**

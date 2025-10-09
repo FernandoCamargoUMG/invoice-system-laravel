@@ -83,13 +83,8 @@ class PaymentController extends Controller
             $payment = Payment::create($validatedData);
             $payment->load(['invoice', 'invoice.customer']);
 
-            // Verificar si la factura está completamente pagada
-            $newTotalPaid = $totalPaid + $validatedData['amount'];
-            if ($newTotalPaid >= $invoice->total) {
-                $invoice->update(['status' => 'paid']);
-            } else {
-                $invoice->update(['status' => 'partial']);
-            }
+            // Los observers automáticamente actualizarán el estado de la factura
+            // No necesitamos hacer el cálculo manual aquí
 
             return response()->json([
                 'message' => 'Pago creado exitosamente',
@@ -140,17 +135,8 @@ class PaymentController extends Controller
             $payment->update($validatedData);
             $payment->load(['invoice', 'invoice.customer']);
 
-            // Recalcular el estado de la factura
-            $invoice = $payment->invoice;
-            $totalPaid = Payment::where('invoice_id', $invoice->id)->sum('amount');
-            
-            if ($totalPaid >= $invoice->total) {
-                $invoice->update(['status' => 'paid']);
-            } elseif ($totalPaid > 0) {
-                $invoice->update(['status' => 'partial']);
-            } else {
-                $invoice->update(['status' => 'pending']);
-            }
+            // Los observers automáticamente recalcularán el estado de la factura
+            // Replicando la funcionalidad del trigger del sistema PHP vanilla
 
             return response()->json([
                 'message' => 'Pago actualizado exitosamente',
@@ -177,19 +163,10 @@ class PaymentController extends Controller
     public function destroy(Payment $payment): JsonResponse
     {
         try {
-            $invoice = $payment->invoice;
             $payment->delete();
-
-            // Recalcular el estado de la factura después de eliminar el pago
-            $totalPaid = Payment::where('invoice_id', $invoice->id)->sum('amount');
             
-            if ($totalPaid >= $invoice->total) {
-                $invoice->update(['status' => 'paid']);
-            } elseif ($totalPaid > 0) {
-                $invoice->update(['status' => 'partial']);
-            } else {
-                $invoice->update(['status' => 'pending']);
-            }
+            // Los observers automáticamente recalcularán el estado de la factura
+            // usando solo los estados permitidos: paid, pending, canceled
 
             return response()->json([
                 'message' => 'Pago eliminado exitosamente'
