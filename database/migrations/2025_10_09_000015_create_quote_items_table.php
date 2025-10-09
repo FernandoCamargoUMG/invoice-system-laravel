@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('quote_id');
             $table->unsignedBigInteger('product_id');
-            $table->integer('quantity');
+            $table->bigInteger('quantity');
             $table->decimal('price', 10, 2); // Precio de venta unitario
             $table->decimal('total_price', 10, 2); // quantity * price
         });

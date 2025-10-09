@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->enum('type', ['purchase', 'sale', 'adjustment', 'return']); // Tipo de movimiento
-            $table->integer('quantity'); // Positivo para entrada, negativo para salida
-            $table->integer('stock_before'); // Stock antes del movimiento
-            $table->integer('stock_after'); // Stock después del movimiento
+            $table->bigInteger('quantity'); // Positivo para entrada, negativo para salida
+            $table->bigInteger('stock_before'); // Stock antes del movimiento
+            $table->bigInteger('stock_after'); // Stock después del movimiento
             $table->string('reference_type')->nullable(); // 'purchase', 'invoice', 'quote', 'manual'
             $table->unsignedBigInteger('reference_id')->nullable(); // ID de la referencia
             $table->text('notes')->nullable();
