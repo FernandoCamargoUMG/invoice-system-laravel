@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear usuario admin
+    // Crear usuario administrador de ejemplo
         User::create([
             'name' => 'Admin',
             'email' => 'admin@invoice.com',
@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin'
         ]);
 
-        // Crear usuario cajero
+    // Crear usuario cajero de ejemplo
         User::create([
             'name' => 'Cajero',
             'email' => 'cajero@invoice.com',
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'cashier'
         ]);
 
-        // Crear clientes de prueba
+    // Crear clientes de ejemplo
         Customer::create([
             'name' => 'Juan Pérez',
             'email' => 'juan@email.com',
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'address' => 'Avenida 456, Ciudad'
         ]);
 
-        // Crear productos de prueba
+    // Crear productos de ejemplo
         Product::create([
             'name' => 'Laptop HP',
             'description' => 'Laptop HP Pavilion 15"',
@@ -68,7 +68,7 @@ class DatabaseSeeder extends Seeder
             'stock' => 25
         ]);
 
-        // Crear más productos para el ERP
+    // Crear productos adicionales para pruebas ERP
         $products = [
             ['name' => 'Monitor Samsung 24"', 'description' => 'Monitor LED Full HD', 'price' => 199.99, 'stock' => 15],
             ['name' => 'Impresora Canon', 'description' => 'Impresora multifuncional', 'price' => 149.99, 'stock' => 8],
@@ -83,7 +83,7 @@ class DatabaseSeeder extends Seeder
             Product::create($product);
         }
 
-        // Llamar a los nuevos seeders del ERP
+    // Ejecutar seeders adicionales del ERP
         $this->call([
             SupplierSeeder::class,
             PurchaseSeeder::class,

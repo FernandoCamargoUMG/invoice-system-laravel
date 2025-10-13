@@ -34,7 +34,7 @@ class InvoiceService
     {
         return DB::transaction(function () use ($invoiceData, $items) {
             
-            // Crear la factura
+            // Crear la factura principal
             $invoice = Invoice::create([
                 'invoice_number' => Invoice::generateInvoiceNumber(),
                 'customer_id' => $invoiceData['customer_id'],
@@ -48,12 +48,12 @@ class InvoiceService
                 'status' => 'draft'
             ]);
 
-            // Procesar items
+            // Procesar cada item
             foreach ($items as $itemData) {
                 $this->addItemToInvoice($invoice, $itemData);
             }
 
-            // Recalcular totales
+            // Recalcular totales de la factura
             $totals = $this->calculateInvoiceTotals($invoice);
             $invoice->update($totals);
 
@@ -68,12 +68,12 @@ class InvoiceService
     {
         $product = Product::findOrFail($itemData['product_id']);
         
-        // Verificar stock
+    // Verificar stock disponible
         if ($product->stock < $itemData['quantity']) {
             throw new \Exception("Stock insuficiente para el producto: {$product->name}");
         }
 
-        // Crear el item
+    // Crear el item de factura
         $invoiceItem = InvoiceItem::create([
             'invoice_id' => $invoice->id,
             'product_id' => $itemData['product_id'],
@@ -81,7 +81,7 @@ class InvoiceService
             'unit_price' => $itemData['unit_price']
         ]);
 
-        // Crear movimiento de inventario y actualizar stock
+    // Crear movimiento de inventario y actualizar stock del producto
         InventoryMovement::createMovement(
             $itemData['product_id'],
             'sale',
@@ -105,7 +105,7 @@ class InvoiceService
         }
 
         DB::transaction(function () use ($invoice) {
-            // Restaurar stock
+            // Restaurar stock de productos
             foreach ($invoice->items as $item) {
                 $item->product->increment('stock', $item->quantity);
             }

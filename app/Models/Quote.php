@@ -37,7 +37,7 @@ class Quote extends Model
     ];
 
 
-        // Los timestamps están habilitados por defecto
+    // Timestamps habilitados por defecto
 
     /**
      * Relación con cliente
@@ -125,7 +125,7 @@ class Quote extends Model
         $tax = 0;
 
         foreach ($this->items as $item) {
-            // Calcular como en sistema original: precio incluye impuesto
+            // Si el precio incluye impuesto, calcular subtotal e impuesto
             $itemSubtotal = $item->price / (1 + $taxRate);
             $itemTax = $item->price - $itemSubtotal;
             $subtotal += $itemSubtotal * $item->quantity;
@@ -151,7 +151,7 @@ class Quote extends Model
             throw new \Exception('La cotización no puede ser convertida a factura');
         }
 
-        // Crear factura con los mismos datos
+    // Crear factura a partir de la cotización
         $invoice = Invoice::create([
             'customer_id' => $this->customer_id,
             'user_id' => $this->user_id,
@@ -163,7 +163,7 @@ class Quote extends Model
             'status' => 'pending'
         ]);
 
-        // Copiar items
+    // Copiar los items de la cotización
         foreach ($this->items as $quoteItem) {
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
@@ -172,7 +172,7 @@ class Quote extends Model
                 'price' => $quoteItem->price
             ]);
 
-            // Crear movimiento de inventario y reducir stock si es producto físico
+            // Crear movimiento de inventario y reducir stock si corresponde
             if ($quoteItem->product->isProduct()) {
                 InventoryMovement::createMovement(
                     $quoteItem->product_id,
@@ -186,7 +186,7 @@ class Quote extends Model
             }
         }
 
-        // Marcar cotización como convertida
+    // Marcar la cotización como convertida
         $this->update([
             'status' => 'converted',
             'converted_invoice_id' => $invoice->id

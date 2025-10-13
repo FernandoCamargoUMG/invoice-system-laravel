@@ -33,7 +33,7 @@ class Purchase extends Model
         'created_at' => 'datetime',
     ];
 
-    // Los timestamps están habilitados por defecto
+    // Timestamps habilitados por defecto
 
     /**
      * Relación con proveedor
@@ -87,7 +87,7 @@ class Purchase extends Model
         $tax = 0;
 
         foreach ($this->items as $item) {
-            // Calcular como en sistema original: precio incluye impuesto
+            // Si el precio incluye impuesto, calcular subtotal e impuesto
             $itemSubtotal = $item->cost_price / (1 + $taxRate);
             $itemTax = $item->cost_price - $itemSubtotal;
             $subtotal += $itemSubtotal * $item->quantity;

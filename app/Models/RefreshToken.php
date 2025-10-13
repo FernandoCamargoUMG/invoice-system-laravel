@@ -49,13 +49,13 @@ class RefreshToken extends Model
      */
     public static function createForUser(int $userId): self
     {
-        // Eliminar tokens anteriores del usuario
+    // Eliminar tokens anteriores del usuario para evitar duplicados
         self::where('user_id', $userId)->delete();
 
         return self::create([
             'user_id' => $userId,
             'token' => self::generateToken(),
-            'expires_at' => Carbon::now()->addDays(7) // 7 días de duración
+            'expires_at' => Carbon::now()->addDays(7) // Token válido por 7 días
         ]);
     }
 
@@ -67,7 +67,7 @@ class RefreshToken extends Model
         $refreshToken = self::where('token', $token)->first();
 
         if (!$refreshToken || $refreshToken->isExpired()) {
-            // Eliminar token expirado
+            // Eliminar token expirado si existe
             if ($refreshToken) {
                 $refreshToken->delete();
             }

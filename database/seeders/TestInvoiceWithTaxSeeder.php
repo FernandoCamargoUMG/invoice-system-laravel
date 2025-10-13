@@ -18,7 +18,7 @@ class TestInvoiceWithTaxSeeder extends Seeder
      */
     public function run(): void
     {
-        // Limpiar datos existentes (en orden correcto por foreign keys)
+    // Limpiar datos existentes respetando dependencias de claves foráneas
         Payment::query()->delete();
         InvoiceItem::query()->delete();
         Invoice::query()->delete();
@@ -26,7 +26,7 @@ class TestInvoiceWithTaxSeeder extends Seeder
         Customer::query()->delete();
         User::query()->delete();
 
-        // Crear usuario
+    // Crear usuario de prueba
         $user = User::create([
             'name' => 'Admin Test',
             'email' => 'admin@test.com',
@@ -34,7 +34,7 @@ class TestInvoiceWithTaxSeeder extends Seeder
             'role' => 'admin'
         ]);
 
-        // Crear cliente
+    // Crear cliente de prueba
         $customer = Customer::create([
             'name' => 'Cliente Test',
             'email' => 'cliente@test.com',
@@ -42,7 +42,7 @@ class TestInvoiceWithTaxSeeder extends Seeder
             'address' => 'Dirección Test'
         ]);
 
-        // Crear productos con precios que incluyen impuestos (como sistema PHP vanilla)
+    // Crear productos con precios que incluyen impuestos (simulación PHP vanilla)
         $product1 = Product::create([
             'name' => 'Laptop HP',
             'description' => 'Laptop HP Pavilion 15"',
@@ -57,7 +57,7 @@ class TestInvoiceWithTaxSeeder extends Seeder
             'stock' => 50
         ]);
 
-        // Crear factura
+    // Crear factura de prueba
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
             'user_id' => $user->id,

@@ -77,7 +77,7 @@ class Invoice extends Model
         $tax = 0;
 
         foreach ($this->items as $item) {
-            // Calcular precio incluye impuesto
+            // Si el precio incluye impuesto, calcular el subtotal y el impuesto correctamente
             $itemSubtotal = $item->price / (1 + $taxRate);
             $itemTax = $item->price - $itemSubtotal;
             $subtotal += $itemSubtotal * $item->quantity;

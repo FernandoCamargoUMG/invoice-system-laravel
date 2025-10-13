@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+// Puedes habilitar RefreshDatabase si necesitas limpiar la base de datos entre pruebas
 use Tests\TestCase;
 
 class ExampleTest extends TestCase

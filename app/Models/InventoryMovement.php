@@ -45,7 +45,16 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Crear movimiento de inventario automáticamente
+     * Crear un movimiento de inventario y actualizar el stock del producto.
+     *
+     * @param Product $product Producto afectado
+     * @param string $type Tipo de movimiento ('sale', 'purchase', etc.)
+     * @param int $quantity Cantidad movida
+     * @param string|null $referenceType Tipo de referencia (ej: 'sale', 'purchase')
+     * @param int|null $referenceId ID de la referencia (ej: id de factura)
+     * @param string|null $notes Notas adicionales
+     * @param int|null $userId Usuario que realiza el movimiento
+     * @return self
      */
     public static function createMovement(
         Product $product,
@@ -58,12 +67,12 @@ class InventoryMovement extends Model
     ): self {
         $stockBefore = $product->stock;
         
-        // Actualizar stock del producto
+    // Actualizar el stock del producto según el tipo de movimiento
         if ($type === 'purchase' || $type === 'return') {
             $product->increment('stock', $quantity);
         } elseif ($type === 'sale') {
             $product->decrement('stock', $quantity);
-            $quantity = -$quantity; // Negativo para salidas
+            $quantity = -$quantity; // Salidas restan stock
         }
         
         $stockAfter = $product->fresh()->stock;

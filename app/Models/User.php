@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+// Si se requiere verificación de email, descomentar la siguiente línea:
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -43,7 +44,7 @@ class User extends Authenticatable
     {
         return [
             'created_at' => 'datetime',
-            // Quitar 'password' => 'hashed' para usar MD5 manual
+            // Quitar 'password' => 'hashed' para usar MD5 manualmente
         ];
     }
 

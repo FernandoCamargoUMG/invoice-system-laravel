@@ -19,7 +19,7 @@ class VerifyIdenticalSeeder extends Seeder
     {
         echo "🔍 VERIFICANDO IDENTIDAD CON SISTEMA PHP VANILLA\n\n";
 
-        // Crear usuario
+    // Crear usuario de prueba
         $user = User::firstOrCreate([
             'email' => 'test@verify.com'
         ], [
@@ -28,7 +28,7 @@ class VerifyIdenticalSeeder extends Seeder
             'role' => 'admin'
         ]);
 
-        // Crear cliente
+    // Crear cliente de prueba
         $customer = Customer::firstOrCreate([
             'email' => 'customer@verify.com'
         ], [
@@ -37,16 +37,16 @@ class VerifyIdenticalSeeder extends Seeder
             'address' => 'Dirección Test'
         ]);
 
-        // Crear producto con precio que incluye impuesto
+    // Crear producto con precio que incluye impuesto
         $product = Product::firstOrCreate([
             'name' => 'Producto Verificación'
         ], [
             'description' => 'Producto para verificar',
-            'price' => 112.00, // Precio incluye 12% impuesto (100 + 12)
+            'price' => 112.00, // Precio incluye 12% de impuesto (100 + 12)
             'stock' => 100
         ]);
 
-        // Crear factura como en PHP vanilla
+    // Crear factura simulando lógica PHP vanilla
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
             'user_id' => $user->id,
@@ -55,7 +55,7 @@ class VerifyIdenticalSeeder extends Seeder
             'status' => 'pending'
         ]);
 
-        // Crear item
+    // Crear item de factura
         InvoiceItem::create([
             'invoice_id' => $invoice->id,
             'product_id' => $product->id,
@@ -63,7 +63,7 @@ class VerifyIdenticalSeeder extends Seeder
             'price' => 112.00
         ]);
 
-        // Calcular totales (como PHP vanilla)
+    // Calcular totales simulando PHP vanilla
         $invoice->load('items', 'payments');
         $invoice->calculateTotals();
 
@@ -76,10 +76,10 @@ class VerifyIdenticalSeeder extends Seeder
         echo "- Balance Due: $" . $invoice->balance_due . "\n";
         echo "- Estado: " . $invoice->status . "\n\n";
 
-        // Verificar que el cálculo sea idéntico al PHP vanilla
-        $expectedSubtotal = 112.00 / (1 + 0.12) * 2; // 200.00
-        $expectedTax = 112.00 * 2 - $expectedSubtotal; // 24.00
-        $expectedTotal = $expectedSubtotal + $expectedTax; // 224.00
+    // Verificar que el cálculo sea idéntico al sistema PHP vanilla
+    $expectedSubtotal = 112.00 / (1 + 0.12) * 2; // 200.00
+    $expectedTax = 112.00 * 2 - $expectedSubtotal; // 24.00
+    $expectedTotal = $expectedSubtotal + $expectedTax; // 224.00
 
         echo "🔍 VERIFICACIÓN CÁLCULOS (vs PHP vanilla):\n";
         echo "- Subtotal esperado: $" . round($expectedSubtotal, 2) . " | Actual: $" . $invoice->subtotal . "\n";
@@ -94,7 +94,7 @@ class VerifyIdenticalSeeder extends Seeder
             echo "❌ DIFERENCIA EN CÁLCULOS!\n\n";
         }
 
-        // Probar trigger automático (cambiar estado a paid)
+    // Probar trigger automático: cambiar estado a 'paid'
         echo "🔄 PROBANDO TRIGGER AUTOMÁTICO:\n";
         $invoice->update(['status' => 'paid']);
         $invoice->refresh();
@@ -106,7 +106,7 @@ class VerifyIdenticalSeeder extends Seeder
             echo "✅ TRIGGER AUTOMÁTICO FUNCIONA IDÉNTICO AL PHP VANILLA!\n\n";
         }
 
-        // Verificar estructura de campos
+    // Verificar estructura de los campos
         echo "📋 CAMPOS IMPLEMENTADOS EN LARAVEL:\n";
         $fields = ['id', 'customer_id', 'user_id', 'total', 'subtotal', 'tax_amount', 'tax_rate', 'balance_due', 'status', 'created_at'];
         foreach ($fields as $field) {

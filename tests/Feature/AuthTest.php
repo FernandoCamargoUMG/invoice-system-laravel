@@ -12,7 +12,7 @@ class AuthTest extends TestCase
 
     public function test_user_can_login_with_valid_credentials()
     {
-        // Arrange
+    // Preparar datos de prueba
         $user = User::create([
             'name' => 'Test Admin',
             'email' => 'admin@example.com',
@@ -20,13 +20,13 @@ class AuthTest extends TestCase
             'role' => 'admin'
         ]);
 
-        // Act
+    // Ejecutar acción
         $response = $this->postJson('/api/auth/login', [
             'email' => 'admin@example.com',
             'password' => 'admin123'
         ]);
 
-        // Assert
+    // Verificar resultado
         $response->assertStatus(200)
                 ->assertJsonStructure([
                     'message',
@@ -56,7 +56,7 @@ class AuthTest extends TestCase
             'password' => md5('admin123')
         ]);
 
-        // Login first
+    // Realizar login primero
         $loginResponse = $this->postJson('/api/auth/login', [
             'email' => $user->email,
             'password' => 'admin123'
@@ -64,7 +64,7 @@ class AuthTest extends TestCase
 
         $refreshToken = $loginResponse->json('refresh_token');
 
-        // Test refresh
+    // Probar endpoint de refresh
         $response = $this->postJson('/api/auth/refresh', [
             'refresh_token' => $refreshToken
         ]);
