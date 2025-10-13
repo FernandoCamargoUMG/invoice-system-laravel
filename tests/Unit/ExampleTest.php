@@ -14,3 +14,4 @@ class ExampleTest extends TestCase
         // Prueba de ejemplo para la carpeta Unit
         $this->assertTrue(true);
     }
+}
