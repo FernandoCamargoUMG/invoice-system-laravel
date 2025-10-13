@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
+use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService
@@ -80,8 +81,16 @@ class InvoiceService
             'unit_price' => $itemData['unit_price']
         ]);
 
-        // Actualizar stock
-        $product->decrement('stock', $itemData['quantity']);
+        // Crear movimiento de inventario y actualizar stock
+        InventoryMovement::createMovement(
+            $itemData['product_id'],
+            'sale',
+            $itemData['quantity'],
+            $invoice->id,
+            'sale',
+            "Agregado a factura #{$invoice->id}",
+            $invoice->user_id
+        );
 
         return $invoiceItem;
     }

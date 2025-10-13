@@ -281,24 +281,17 @@ class PurchaseController extends Controller
             // Actualizar inventario para cada item
             foreach ($purchase->items as $item) {
                 $product = $item->product;
-                $oldStock = $product->stock;
-                
-                // Aumentar stock
-                $product->increment('stock', $item->quantity);
-                
                 // Actualizar precio de costo si es diferente
                 if ($product->cost_price != $item->cost_price) {
                     $product->update(['cost_price' => $item->cost_price]);
                 }
 
-                // Registrar movimiento de inventario
+                // Registrar movimiento de inventario (también actualiza el stock)
                 InventoryMovement::createMovement(
-                    $product->id,
+                    $product,
                     'purchase',
                     $item->quantity,
-                    $oldStock,
-                    $product->fresh()->stock,
-                    'purchase',
+                    'App\\Models\\Purchase',
                     $purchase->id,
                     "Compra #{$purchase->purchase_number}",
                     Auth::id()

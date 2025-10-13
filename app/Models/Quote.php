@@ -171,9 +171,17 @@ class Quote extends Model
                 'price' => $quoteItem->price
             ]);
 
-            // Reducir stock si es producto físico
+            // Crear movimiento de inventario y reducir stock si es producto físico
             if ($quoteItem->product->isProduct()) {
-                $quoteItem->product->decrement('stock', $quoteItem->quantity);
+                InventoryMovement::createMovement(
+                    $quoteItem->product_id,
+                    'sale',
+                    $quoteItem->quantity,
+                    $invoice->id,
+                    'sale',
+                    "Conversión de cotización #{$this->id} a factura #{$invoice->id}",
+                    $this->user_id
+                );
             }
         }
 

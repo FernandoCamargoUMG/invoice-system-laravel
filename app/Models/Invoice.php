@@ -14,6 +14,7 @@ class Invoice extends Model
     protected $fillable = [
         'customer_id',
         'user_id',
+        'invoice_date',
         'total',
         'subtotal',
         'tax_amount',
@@ -23,6 +24,7 @@ class Invoice extends Model
     ];
 
     protected $casts = [
+        'invoice_date' => 'date',
         'total' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',

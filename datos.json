@@ -1,0 +1,66 @@
+{
+    "email": "admin@test.com",
+    "password": "password123"
+}
+
+
+{
+    "name": "Proveedor ABC S.A.",
+    "email": "contacto@proveedorabc.com",
+    "phone": "555-0123",
+    "address": "Av. Principal 123, Ciudad",
+    "contact_person": "Juan Pérez",
+    "tax_id": "1234567890",
+    "notes": "Proveedor principal de insumos"
+}
+
+
+{
+    "name": "Producto de Prueba ERP",
+    "description": "Producto para probar el sistema ERP",
+    "price": 25.99,
+    "stock": 100,
+    "type": "product",
+    "sku": "PROD-001",
+    "cost_price": 15.50
+}
+
+{
+    "name": "Cliente ERP Test",
+    "email": "cliente@test.com",
+    "phone": "555-9876",
+    "address": "Calle Falsa 123"
+}
+
+{
+    "supplier_id": 1,
+    "purchase_date": "2025-10-09",
+    "notes": "Compra de prueba del sistema ERP",
+    "items": [
+        {
+            "product_id": 1,
+            "quantity": 50,
+            "cost_price": 15.00
+        }
+    ]
+}
+
+{
+    "customer_id": 1,
+    "quote_date": "2025-10-09",
+    "valid_until": "2025-10-30",
+    "notes": "Cotización de prueba del sistema ERP",
+    "items": [
+        {
+            "product_id": 1,
+            "quantity": 10,
+            "price": 25.99
+        }
+    ]
+}
+
+{
+    "product_id": 1,
+    "quantity": 25,
+    "notes": "Ajuste manual de inventario - producto encontrado en almacén"
+}
