@@ -165,29 +165,6 @@ class QuoteController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Mostrar una cotización específica
-     */
-    public function show(Quote $quote): JsonResponse
-    {
-        try {
-            $quote->load(['customer', 'user', 'items.product', 'convertedInvoice']);
-
-            return response()->json([
-                'success' => true,
-                'data' => $quote
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener la cotización',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
     /**
      * Actualizar una cotización (solo si está en borrador)
      */

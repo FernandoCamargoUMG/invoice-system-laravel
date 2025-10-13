@@ -89,6 +89,7 @@ class DatabaseSeeder extends Seeder
             PurchaseSeeder::class,
             QuoteSeeder::class,
             InventoryMovementSeeder::class,
+            TaxSeeder::class
         ]);
     }
 }

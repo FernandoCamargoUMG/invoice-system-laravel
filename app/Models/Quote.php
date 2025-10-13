@@ -36,7 +36,8 @@ class Quote extends Model
         'created_at' => 'datetime',
     ];
 
-    public $timestamps = false;
+
+        // Los timestamps están habilitados por defecto
 
     /**
      * Relación con cliente

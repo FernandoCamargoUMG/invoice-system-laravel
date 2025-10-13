@@ -19,11 +19,11 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('tax_rate', 5, 4)->default(0.12);
-            $table->decimal('total', 10, 2);
+            $table->decimal('total', 10, 2)->default(0);
             $table->enum('status', ['pending', 'received', 'canceled'])->default('pending');
             $table->date('purchase_date');
             $table->text('notes')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

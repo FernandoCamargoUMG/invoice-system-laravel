@@ -18,7 +18,7 @@ class QuoteSeeder extends Seeder
     public function run(): void
     {
         $user = User::first(); // Usuario admin
-        $customers = Customer::take(5)->get();
+        $customers = Customer::all(); // Todos los customers disponibles
         $products = Product::take(10)->get();
 
         $quotes = [
@@ -50,7 +50,7 @@ class QuoteSeeder extends Seeder
                 ]
             ],
             [
-                'customer_id' => $customers[2]->id,
+                'customer_id' => $customers[0]->id,
                 'user_id' => $user->id,
                 'quote_number' => 'QUO-003',
                 'quote_date' => '2025-10-06',
@@ -63,7 +63,7 @@ class QuoteSeeder extends Seeder
                 ]
             ],
             [
-                'customer_id' => $customers[3]->id,
+                'customer_id' => $customers[1]->id,
                 'user_id' => $user->id,
                 'quote_number' => 'QUO-004',
                 'quote_date' => '2025-10-08',
@@ -76,7 +76,7 @@ class QuoteSeeder extends Seeder
                 ]
             ],
             [
-                'customer_id' => $customers[4]->id,
+                'customer_id' => $customers[0]->id,
                 'user_id' => $user->id,
                 'quote_number' => 'QUO-005',
                 'quote_date' => '2025-09-25',

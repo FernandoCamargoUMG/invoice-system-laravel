@@ -91,11 +91,11 @@ class InvoiceController extends Controller
 
                     // Crear movimiento de inventario y actualizar stock
                     InventoryMovement::createMovement(
-                        $itemData['product_id'],
+                        $product, // Pasar el objeto Product
                         'sale',
                         $itemData['quantity'],
-                        $invoice->id,
-                        'sale',
+                        'sale', // referenceType
+                        $invoice->id, // referenceId
                         "Venta - Factura #{$invoice->id}",
                         $invoice->user_id
                     );

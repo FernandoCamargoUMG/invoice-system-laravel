@@ -82,22 +82,40 @@ class PurchaseController extends Controller
 
             DB::beginTransaction();
 
-            // Crear la compra
+            // Calcular totales CON LÓGICA DE GUATEMALA
+            // En compras, el precio ya viene CON IVA incluido
+            $taxRate = 0.12; // 12% IVA Guatemala
+            $total = 0;
+            $subtotal = 0;
+            
+            foreach ($validated['items'] as $itemData) {
+                $totalItemConIva = $itemData['quantity'] * $itemData['cost_price'];
+                $total += $totalItemConIva;
+                
+                // Separar el IVA: precio sin IVA = precio con IVA / (1 + tasa IVA)
+                $subtotalItem = $totalItemConIva / (1 + $taxRate);
+                $subtotal += $subtotalItem;
+            }
+            
+            $taxAmount = $total - $subtotal;
+
+            // Crear la compra CON todos los campos requeridos
             $purchase = Purchase::create([
                 'supplier_id' => $validated['supplier_id'],
-                'user_id' => Auth::id(),
+                'user_id' => Auth::id() ?? 1, // Fallback al usuario ID 1 si no hay autenticación
                 'purchase_number' => Purchase::generatePurchaseNumber(),
                 'purchase_date' => $validated['purchase_date'],
                 'notes' => $validated['notes'] ?? null,
-                'status' => 'pending'
+                'status' => 'pending',
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'tax_rate' => $taxRate,
+                'total' => $total
             ]);
-
-            $subtotal = 0;
 
             // Crear los items de la compra
             foreach ($validated['items'] as $itemData) {
                 $totalCost = $itemData['quantity'] * $itemData['cost_price'];
-                $subtotal += $totalCost;
 
                 PurchaseItem::create([
                     'purchase_id' => $purchase->id,
@@ -107,19 +125,6 @@ class PurchaseController extends Controller
                     'total_cost' => $totalCost
                 ]);
             }
-
-            // Calcular totales con impuestos (igual que en invoices)
-            $taxRate = 0.12; // 12% IVA
-            $taxAmount = $subtotal * $taxRate;
-            $total = $subtotal + $taxAmount;
-
-            // Actualizar totales
-            $purchase->update([
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'tax_rate' => $taxRate,
-                'total' => $total
-            ]);
 
             DB::commit();
 
@@ -291,7 +296,7 @@ class PurchaseController extends Controller
                     $product,
                     'purchase',
                     $item->quantity,
-                    'App\\Models\\Purchase',
+                    'purchase',
                     $purchase->id,
                     "Compra #{$purchase->purchase_number}",
                     Auth::id()
