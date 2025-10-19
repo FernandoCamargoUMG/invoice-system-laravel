@@ -174,12 +174,13 @@ class Quote extends Model
 
             // Crear movimiento de inventario y reducir stock si corresponde
             if ($quoteItem->product->isProduct()) {
+                // Pasar el objeto Product y el orden correcto de parámetros
                 InventoryMovement::createMovement(
-                    $quoteItem->product_id,
+                    $quoteItem->product,
                     'sale',
                     $quoteItem->quantity,
-                    $invoice->id,
                     'sale',
+                    $invoice->id,
                     "Conversión de cotización #{$this->id} a factura #{$invoice->id}",
                     $this->user_id
                 );

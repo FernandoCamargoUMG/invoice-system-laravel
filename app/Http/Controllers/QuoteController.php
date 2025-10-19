@@ -90,6 +90,15 @@ class QuoteController extends Controller
 
             DB::beginTransaction();
 
+            // Verificar que la petición venga de un usuario autenticado
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autenticado'
+                ], 401);
+            }
+
             // Verificar stock disponible
             foreach ($validated['items'] as $itemData) {
                 $product = Product::find($itemData['product_id']);
@@ -98,23 +107,35 @@ class QuoteController extends Controller
                 }
             }
 
-            // Crear la cotización
+            // Calcular subtotal/tax/total desde los items antes de crear la cotización
+            $subtotal = 0;
+            foreach ($validated['items'] as $itemData) {
+                $subtotal += ($itemData['quantity'] * $itemData['price']);
+            }
+
+            // Calcular totales con impuestos (igual que en invoices)
+            $taxRate = 0.12; // 12% IVA
+            $taxAmount = $subtotal * $taxRate;
+            $total = $subtotal + $taxAmount;
+
+            // Crear la cotización incluyendo totales para evitar inserciones fallidas cuando la columna 'total' no admite NULL
             $quote = Quote::create([
                 'customer_id' => $validated['customer_id'],
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
                 'quote_number' => Quote::generateQuoteNumber(),
                 'quote_date' => $validated['quote_date'],
                 'valid_until' => $validated['valid_until'],
                 'notes' => $validated['notes'] ?? null,
-                'status' => 'draft'
+                'status' => 'draft',
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'tax_rate' => $taxRate,
+                'total' => $total
             ]);
-
-            $subtotal = 0;
 
             // Crear los items de la cotización
             foreach ($validated['items'] as $itemData) {
                 $totalPrice = $itemData['quantity'] * $itemData['price'];
-                $subtotal += $totalPrice;
 
                 QuoteItem::create([
                     'quote_id' => $quote->id,
@@ -124,19 +145,6 @@ class QuoteController extends Controller
                     'total_price' => $totalPrice
                 ]);
             }
-
-            // Calcular totales con impuestos (igual que en invoices)
-            $taxRate = 0.12; // 12% IVA
-            $taxAmount = $subtotal * $taxRate;
-            $total = $subtotal + $taxAmount;
-
-            // Actualizar totales
-            $quote->update([
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'tax_rate' => $taxRate,
-                'total' => $total
-            ]);
 
             DB::commit();
 
@@ -310,7 +318,8 @@ class QuoteController extends Controller
                 ], 422);
             }
 
-            if (!$quote->canBeConverted()) {
+            // Verificar que la cotización no esté vencida antes de aprobar
+            if ($quote->isExpired()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La cotización ha expirado o no puede ser aprobada'
