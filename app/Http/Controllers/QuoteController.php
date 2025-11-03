@@ -107,18 +107,7 @@ class QuoteController extends Controller
                 }
             }
 
-            // Calcular subtotal/tax/total desde los items antes de crear la cotización
-            $subtotal = 0;
-            foreach ($validated['items'] as $itemData) {
-                $subtotal += ($itemData['quantity'] * $itemData['price']);
-            }
-
-            // Calcular totales con impuestos (igual que en invoices)
-            $taxRate = 0.12; // 12% IVA
-            $taxAmount = $subtotal * $taxRate;
-            $total = $subtotal + $taxAmount;
-
-            // Crear la cotización incluyendo totales para evitar inserciones fallidas cuando la columna 'total' no admite NULL
+            // Crear la cotización con datos mínimos (totales en 0, se recalculan después)
             $quote = Quote::create([
                 'customer_id' => $validated['customer_id'],
                 'user_id' => $user->id,
@@ -127,24 +116,26 @@ class QuoteController extends Controller
                 'valid_until' => $validated['valid_until'],
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'draft',
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'tax_rate' => $taxRate,
-                'total' => $total
+                'subtotal' => 0,
+                'tax_amount' => 0,
+                'tax_rate' => 0,
+                'total' => 0
             ]);
 
             // Crear los items de la cotización
             foreach ($validated['items'] as $itemData) {
-                $totalPrice = $itemData['quantity'] * $itemData['price'];
-
                 QuoteItem::create([
                     'quote_id' => $quote->id,
                     'product_id' => $itemData['product_id'],
                     'quantity' => $itemData['quantity'],
                     'price' => $itemData['price'],
-                    'total_price' => $totalPrice
+                    // total_price se calcula automáticamente en el modelo
                 ]);
             }
+
+            // Calcular y actualizar totales usando la lógica centralizada del modelo
+            $quote->load('items');
+            $quote->calculateTotals();
 
             DB::commit();
 
@@ -220,32 +211,20 @@ class QuoteController extends Controller
                 // Eliminar items existentes
                 $quote->items()->delete();
 
-                $subtotal = 0;
-
                 // Crear nuevos items
                 foreach ($validated['items'] as $itemData) {
-                    $totalPrice = $itemData['quantity'] * $itemData['price'];
-                    $subtotal += $totalPrice;
-
                     QuoteItem::create([
                         'quote_id' => $quote->id,
                         'product_id' => $itemData['product_id'],
                         'quantity' => $itemData['quantity'],
                         'price' => $itemData['price'],
-                        'total_price' => $totalPrice
+                        // total_price se calcula automáticamente en el modelo
                     ]);
                 }
 
-                // Recalcular totales
-                $taxRate = 0.12;
-                $taxAmount = $subtotal * $taxRate;
-                $total = $subtotal + $taxAmount;
-
-                $quote->update([
-                    'subtotal' => $subtotal,
-                    'tax_amount' => $taxAmount,
-                    'total' => $total
-                ]);
+                // Recalcular totales usando la lógica centralizada del modelo
+                $quote->load('items');
+                $quote->calculateTotals();
             }
 
             DB::commit();

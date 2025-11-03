@@ -15,12 +15,21 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('auth_token', response.token);",
-									"    console.log('Token guardado:', response.token);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    const response = pm.response.json();",
+										"    if (response.access_token) {",
+										"        pm.environment.set('auth_token', response.access_token);",
+										"        console.log('Token guardado:', response.access_token);",
+										"    } else if (response.token) {",
+										"        pm.environment.set('auth_token', response.token);",
+										"        console.log('Token guardado:', response.token);",
+										"    } else {",
+										"        console.error('No se encontró el token en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Login fallido, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -35,7 +44,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@test.com\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"email\": \"admin@invoice.com\",\n    \"password\": \"admin123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -104,12 +113,24 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('supplier_id', response.data.id);",
-									"    console.log('Proveedor creado con ID:', response.data.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 201) {",
+										"    const response = pm.response.json();",
+										"    let id = null;",
+										"    if (response.data && response.data.id) { id = response.data.id; }",
+										"    else if (response.id) { id = response.id; }",
+										"    else if (typeof response === 'object') {",
+										"        for (let k in response) { if (typeof response[k] === 'number') { id = response[k]; break; } }",
+										"    }",
+										"    if (id) {",
+										"        pm.environment.set('supplier_id', id);",
+										"        console.log('Proveedor creado con ID:', id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de proveedor en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Creación de proveedor fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -128,7 +149,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Proveedor ABC S.A.\",\n    \"email\": \"contacto@proveedorabc.com\",\n    \"phone\": \"555-0123\",\n    \"address\": \"Av. Principal 123, Ciudad\",\n    \"contact_person\": \"Juan Pérez\",\n    \"tax_id\": \"1234567890\",\n    \"notes\": \"Proveedor principal de insumos\"\n}"
+							"raw": "{\n    \"name\": \"Proveedor ABC S.A.\",\n    \"email\": \"proveedor{{$randomInt}}@test.com\",\n    \"phone\": \"555-{{randomInt}}\",\n    \"address\": \"Av. Principal {{randomInt}}, Ciudad\",\n    \"contact_person\": \"Juan Pérez\",\n    \"tax_id\": \"TAX{{randomInt}}\",\n    \"notes\": \"Proveedor principal de insumos\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/suppliers",
@@ -247,12 +268,24 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('product_id', response.data.id);",
-									"    console.log('Producto creado con ID:', response.data.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 201) {",
+										"    const response = pm.response.json();",
+										"    let id = null;",
+										"    if (response.data && response.data.id) { id = response.data.id; }",
+										"    else if (response.id) { id = response.id; }",
+										"    else if (typeof response === 'object') {",
+										"        for (let k in response) { if (typeof response[k] === 'number') { id = response[k]; break; } }",
+										"    }",
+										"    if (id) {",
+										"        pm.environment.set('product_id', id);",
+										"        console.log('Producto creado con ID:', id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de producto en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Creación de producto fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -271,7 +304,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Producto de Prueba ERP\",\n    \"description\": \"Producto para probar el sistema ERP\",\n    \"price\": 25.99,\n    \"stock\": 100,\n    \"type\": \"product\",\n    \"sku\": \"PROD-001\",\n    \"cost_price\": 15.50\n}"
+							"raw": "{\n    \"name\": \"Producto ERP {{$randomInt}}\",\n    \"description\": \"Producto para probar el sistema ERP\",\n    \"price\": 25.99,\n    \"stock\": 100,\n    \"type\": \"product\",\n    \"sku\": \"PROD-{{randomInt}}\",\n    \"cost_price\": 15.50\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/products",
@@ -324,12 +357,24 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('purchase_id', response.data.id);",
-									"    console.log('Compra creada con ID:', response.data.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 201) {",
+										"    const response = pm.response.json();",
+										"    let id = null;",
+										"    if (response.data && response.data.id) { id = response.data.id; }",
+										"    else if (response.id) { id = response.id; }",
+										"    else if (typeof response === 'object') {",
+										"        for (let k in response) { if (typeof response[k] === 'number') { id = response[k]; break; } }",
+										"    }",
+										"    if (id) {",
+										"        pm.environment.set('purchase_id', id);",
+										"        console.log('Compra creada con ID:', id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de compra en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Creación de compra fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -429,12 +474,24 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('customer_id', response.data.id);",
-									"    console.log('Cliente creado con ID:', response.data.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 201) {",
+										"    const response = pm.response.json();",
+										"    let id = null;",
+										"    if (response.data && response.data.id) { id = response.data.id; }",
+										"    else if (response.id) { id = response.id; }",
+										"    else if (typeof response === 'object') {",
+										"        for (let k in response) { if (typeof response[k] === 'number') { id = response[k]; break; } }",
+										"    }",
+										"    if (id) {",
+										"        pm.environment.set('customer_id', id);",
+										"        console.log('Cliente creado con ID:', id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de cliente en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Creación de cliente fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -453,7 +510,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Cliente ERP Test\",\n    \"email\": \"cliente@test.com\",\n    \"phone\": \"555-9876\",\n    \"address\": \"Calle Falsa 123\"\n}"
+							"raw": "{\n    \"name\": \"Cliente ERP {{$randomInt}}\",\n    \"email\": \"cliente{{$randomInt}}@test.com\",\n    \"phone\": \"555-{{randomInt}}\",\n    \"address\": \"Calle Falsa {{randomInt}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/customers",
@@ -506,12 +563,24 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('quote_id', response.data.id);",
-									"    console.log('Cotización creada con ID:', response.data.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 201) {",
+										"    const response = pm.response.json();",
+										"    let id = null;",
+										"    if (response.data && response.data.id) { id = response.data.id; }",
+										"    else if (response.id) { id = response.id; }",
+										"    else if (typeof response === 'object') {",
+										"        for (let k in response) { if (typeof response[k] === 'number') { id = response[k]; break; } }",
+										"    }",
+										"    if (id) {",
+										"        pm.environment.set('quote_id', id);",
+										"        console.log('Cotización creada con ID:', id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de cotización en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Creación de cotización fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
@@ -596,12 +665,18 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.environment.set('invoice_id', response.data.invoice.id);",
-									"    console.log('Factura creada con ID:', response.data.invoice.id);",
-									"}"
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    const response = pm.response.json();",
+										"    if (response.data && response.data.invoice && response.data.invoice.id) {",
+										"        pm.environment.set('invoice_id', response.data.invoice.id);",
+										"        console.log('Factura creada con ID:', response.data.invoice.id);",
+										"    } else {",
+										"        console.error('No se encontró el ID de factura en la respuesta');",
+										"    }",
+										"} else {",
+										"    console.error('Conversión a factura fallida, código:', pm.response.code);",
+										"}"
 								]
 							}
 						}
