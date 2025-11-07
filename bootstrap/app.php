@@ -12,12 +12,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // No necesitas registrar HandleCors aquí, Laravel lo aplica automáticamente
-        // desde config/cors.php
+        // CORS personalizado como primera opción
+        $middleware->use([
+            \App\Http\Middleware\CustomCorsMiddleware::class,
+        ]);
+        
+        // Para rutas API específicamente
+        $middleware->group('api', [
+            \App\Http\Middleware\CustomCorsMiddleware::class,
+        ]);
 
         // Alias de middlewares personalizados
         $middleware->alias([
             'jwt' => \App\Http\Middleware\JwtMiddleware::class,
+            'cors' => \App\Http\Middleware\CustomCorsMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
