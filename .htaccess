@@ -1,8 +1,28 @@
+# === CORS HEADERS - SOLUCIÓN DEFINITIVA ===
+<IfModule mod_headers.c>
+    # Permitir todos los orígenes
+    Header always set Access-Control-Allow-Origin "*"
+    
+    # Métodos permitidos
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    
+    # Headers permitidos
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    
+    # Cache para preflight
+    Header always set Access-Control-Max-Age "86400"
+</IfModule>
+
+# === MANEJAR OPTIONS REQUESTS ===
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /invoice/
 
-    # Redirigir todo a index.php
+    # Manejar preflight OPTIONS - RESPONDER DIRECTAMENTE
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ - [R=200,L]
+
+    # Redirigir todo lo demás a index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
