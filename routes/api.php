@@ -18,6 +18,10 @@ Route::middleware(\App\Http\Middleware\SimpleCorsMiddleware::class)->group(funct
 
 // Rutas públicas (sin autenticación)
 Route::prefix('auth')->group(function () {
+    Route::options('register', [AuthController::class, 'options']);
+    Route::options('login', [AuthController::class, 'options']);
+    Route::options('refresh', [AuthController::class, 'options']);
+    
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('refresh', [AuthController::class, 'refresh']);

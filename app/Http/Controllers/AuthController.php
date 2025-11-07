@@ -16,6 +16,26 @@ use Firebase\JWT\Key;
 class AuthController extends Controller
 {
     /**
+     * Agregar headers CORS a cualquier respuesta
+     */
+    private function addCorsHeaders($response)
+    {
+        return $response
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin')
+            ->header('Access-Control-Allow-Credentials', 'false');
+    }
+
+    /**
+     * Manejar OPTIONS request para CORS
+     */
+    public function options()
+    {
+        return $this->addCorsHeaders(response('', 200));
+    }
+
+    /**
      * Registrar nuevo usuario
      */
     public function register(Request $request): JsonResponse
@@ -35,17 +55,17 @@ class AuthController extends Controller
 
             $token = $this->generateJWT($user);
 
-            return response()->json([
+            return $this->addCorsHeaders(response()->json([
                 'message' => 'Usuario registrado exitosamente',
                 'user' => $user,
                 'token' => $token
-            ], 201);
+            ], 201));
 
         } catch (ValidationException $e) {
-            return response()->json([
+            return $this->addCorsHeaders(response()->json([
                 'message' => 'Error de validación',
                 'errors' => $e->errors()
-            ], 422);
+            ], 422));
         }
     }
 
@@ -90,7 +110,7 @@ class AuthController extends Controller
                     $accessToken = $this->generateJWT($user);
                     $refreshToken = RefreshToken::createForUser($user->id);
 
-                    return response()->json([
+                    return $this->addCorsHeaders(response()->json([
                         'message' => 'Login exitoso',
                         'user' => [
                             'id' => $user->id,
@@ -102,27 +122,27 @@ class AuthController extends Controller
                         'token_type' => 'Bearer',
                         'access_token_expires_in' => 14400, // 4 horas en segundos
                         'refresh_token_expires_in' => 604800 // 7 días en segundos (7 * 24 * 60 * 60)
-                    ]);
+                    ]));
                 }
             }
 
             Log::info('Login failed - invalid credentials');
-            return response()->json([
+            return $this->addCorsHeaders(response()->json([
                 'message' => 'Credenciales inválidas'
-            ], 401);
+            ], 401));
 
         } catch (ValidationException $e) {
             Log::error('Validation error', ['errors' => $e->errors()]);
-            return response()->json([
+            return $this->addCorsHeaders(response()->json([
                 'message' => 'Error de validación',
                 'errors' => $e->errors()
-            ], 422);
+            ], 422));
         } catch (\Exception $e) {
             Log::error('Login error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json([
+            return $this->addCorsHeaders(response()->json([
                 'message' => 'Error interno del servidor',
                 'error' => $e->getMessage()
-            ], 500);
+            ], 500));
         }
     }
 
