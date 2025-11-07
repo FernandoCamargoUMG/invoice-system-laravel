@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 define('LARAVEL_START', microtime(true));
 
 // Si Laravel está en modo mantenimiento
-if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
-    require __DIR__.'/../storage/framework/maintenance.php';
+if (file_exists(__DIR__.'/storage/framework/maintenance.php')) {
+    require __DIR__.'/storage/framework/maintenance.php';
 }
 
 // Cargar Composer autoload

@@ -13,6 +13,9 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\InventoryMovementController;
 
+// CORS para todas las rutas
+Route::middleware(\App\Http\Middleware\SimpleCorsMiddleware::class)->group(function () {
+
 // Rutas públicas (sin autenticación)
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
@@ -78,3 +81,5 @@ Route::middleware('jwt')->group(function () {
     Route::get('inventory-export', [InventoryMovementController::class, 'export']);
     
 });
+
+}); // Cierre del grupo CORS

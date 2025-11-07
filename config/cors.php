@@ -1,19 +1,27 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-    
+    /*
+    |--------------------------------------------------------------------------
+    | Cross-Origin Resource Sharing (CORS) Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'],
+
     'allowed_methods' => ['*'],
-    
-    'allowed_origins' => ['*'], // Temporal para desarrollo
-    
+
+    'allowed_origins' => env('APP_ENV') === 'production' 
+        ? array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', ''))) 
+        : ['*'],
+
     'allowed_origins_patterns' => [],
-    
+
     'allowed_headers' => ['*'],
-    
+
     'exposed_headers' => [],
-    
-    'max_age' => 3600, // Cache preflight por 1 hora
-    
-    'supports_credentials' => false, // Temporal para desarrollo
+
+    'max_age' => 0,
+
+    'supports_credentials' => false,
 ];
