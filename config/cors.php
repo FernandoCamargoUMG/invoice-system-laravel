@@ -11,9 +11,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => env('APP_ENV') === 'production' 
-        ? array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', ''))) 
-        : ['*'],
+    'allowed_origins' => [
+        'https://demoscode.site',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        '*'
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -23,5 +26,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 ];
