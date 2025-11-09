@@ -80,6 +80,15 @@ class PurchaseController extends Controller
                 'items.*.cost_price' => 'required|numeric|min:0.01'
             ]);
 
+            // Requerir usuario autenticado (sin fallback)
+            $userId = Auth::id();
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado. Debe iniciar sesión para crear compras.'
+                ], 401);
+            }
+
             DB::beginTransaction();
 
             // Calcular totales CON LÓGICA DE GUATEMALA
@@ -102,7 +111,7 @@ class PurchaseController extends Controller
             // Crear la compra CON todos los campos requeridos
             $purchase = Purchase::create([
                 'supplier_id' => $validated['supplier_id'],
-                'user_id' => Auth::id() ?? 1, // Fallback al usuario ID 1 si no hay autenticación
+                'user_id' => $userId, // Usuario autenticado (sin fallback)
                 'purchase_number' => Purchase::generatePurchaseNumber(),
                 'purchase_date' => $validated['purchase_date'],
                 'notes' => $validated['notes'] ?? null,
@@ -281,6 +290,15 @@ class PurchaseController extends Controller
                 ], 422);
             }
 
+            // Requerir usuario autenticado
+            $userId = Auth::id();
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado. Debe iniciar sesión para recibir compras.'
+                ], 401);
+            }
+
             DB::beginTransaction();
 
             // Actualizar inventario para cada item
@@ -299,7 +317,7 @@ class PurchaseController extends Controller
                     'purchase',
                     $purchase->id,
                     "Compra #{$purchase->purchase_number}",
-                    Auth::id()
+                    $userId
                 );
             }
 

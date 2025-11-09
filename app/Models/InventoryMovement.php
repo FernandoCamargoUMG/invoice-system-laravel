@@ -86,7 +86,7 @@ class InventoryMovement extends Model
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
             'notes' => $notes,
-            'user_id' => $userId ?: (\Illuminate\Support\Facades\Auth::id() ?? 1)
+            'user_id' => $userId ?: \Illuminate\Support\Facades\Auth::id() // Sin fallback a 1
         ]);
     }
 
