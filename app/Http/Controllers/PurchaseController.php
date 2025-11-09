@@ -80,15 +80,6 @@ class PurchaseController extends Controller
                 'items.*.cost_price' => 'required|numeric|min:0.01'
             ]);
 
-            // Requerir usuario autenticado (sin fallback)
-            $userId = Auth::id();
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no autenticado. Debe iniciar sesión para crear compras.'
-                ], 401);
-            }
-
             DB::beginTransaction();
 
             // Calcular totales CON LÓGICA DE GUATEMALA
@@ -111,7 +102,7 @@ class PurchaseController extends Controller
             // Crear la compra CON todos los campos requeridos
             $purchase = Purchase::create([
                 'supplier_id' => $validated['supplier_id'],
-                'user_id' => $userId, // Usuario autenticado (sin fallback)
+                'user_id' => $request->user()->id, // Como en InvoiceController
                 'purchase_number' => Purchase::generatePurchaseNumber(),
                 'purchase_date' => $validated['purchase_date'],
                 'notes' => $validated['notes'] ?? null,
@@ -280,7 +271,7 @@ class PurchaseController extends Controller
     /**
      * Recibir mercancía (actualizar inventario)
      */
-    public function receive(Purchase $purchase): JsonResponse
+    public function receive(Request $request, Purchase $purchase): JsonResponse
     {
         try {
             if ($purchase->status !== 'pending') {
@@ -288,15 +279,6 @@ class PurchaseController extends Controller
                     'success' => false,
                     'message' => 'Solo se pueden recibir compras pendientes'
                 ], 422);
-            }
-
-            // Requerir usuario autenticado
-            $userId = Auth::id();
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no autenticado. Debe iniciar sesión para recibir compras.'
-                ], 401);
             }
 
             DB::beginTransaction();
@@ -317,7 +299,7 @@ class PurchaseController extends Controller
                     'purchase',
                     $purchase->id,
                     "Compra #{$purchase->purchase_number}",
-                    $userId
+                    $request->user()->id
                 );
             }
 
